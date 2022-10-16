@@ -1,10 +1,12 @@
 mod contract;
 pub(crate) mod memory;
 mod stack;
+mod transient_storage;
 
 pub use contract::Contract;
 pub use memory::Memory;
 pub use stack::Stack;
+pub use transient_storage::TransientStorage;
 
 use crate::{
     instructions::{eval, Return},
@@ -25,6 +27,8 @@ pub struct Interpreter {
     pub memory: Memory,
     /// Stack.
     pub stack: Stack,
+    /// Transient Storage.
+    pub transient_storage: TransientStorage,
     /// left gas. Memory gas can be found in Memory field.
     pub gas: Gas,
     /// After call returns, its return data is saved here.
@@ -41,6 +45,7 @@ impl Interpreter {
             program_counter: contract.code.as_ptr(),
             return_range: Range::default(),
             memory: Memory::new(),
+            transient_storage: TransientStorage::default(),
             stack: Stack::new(),
             return_data_buffer: Bytes::new(),
             contract,

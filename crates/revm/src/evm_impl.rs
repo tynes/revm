@@ -607,6 +607,16 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
             .sstore(address, index, value, self.data.db)
     }
 
+    // TODO
+    fn tload(&mut self, address: H160, index: U256) -> U256 {
+        U256::from(0)
+    }
+
+    // TODO
+    fn tstore(&mut self, address: H160, index: U256, value: U256) {
+        //
+    }
+
     fn log(&mut self, address: H160, topics: Vec<H256>, data: Bytes) {
         let log = Log {
             address,
@@ -684,6 +694,10 @@ pub trait Host {
     fn sload(&mut self, address: H160, index: U256) -> (U256, bool);
     /// Set storage value of address at index. Return if slot is cold/hot access.
     fn sstore(&mut self, address: H160, index: U256, value: U256) -> (U256, U256, U256, bool);
+
+    fn tload(&mut self, address: H160, index: U256) -> U256;
+    fn tstore(&mut self, address: H160, index: U256, value: U256);
+
     /// Create a log owned by address with given topics and data.
     fn log(&mut self, address: H160, topics: Vec<H256>, data: Bytes);
     /// Mark an address to be deleted, with funds transferred to target.

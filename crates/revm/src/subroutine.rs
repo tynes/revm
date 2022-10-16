@@ -50,6 +50,7 @@ pub struct DirtyChangeLog {
     // If it is cold loaded in this subrutine SlotChangeLog will be COLD.
     // if it is hot and it gets changes somewhare in child subroutine, SlotChangeLog will contain old value OriginalDirty,
     dirty_storage: Map<U256, SlotChangeLog>,
+    dirty_transient: Map<U256, SlotChangeLog>,
     // account info, when reverting just overrride state value.
     info: AccountInfo,
     was_clean: bool,
@@ -220,6 +221,7 @@ impl SubRoutine {
                     let mut changelog = DirtyChangeLog {
                         info: acc.info.clone(),
                         dirty_storage: Map::new(),
+                        dirty_transient: Map::new(),
                         was_clean,
                     };
                     update(&mut changelog);
@@ -349,6 +351,16 @@ impl SubRoutine {
                 {
                     // Handle storage change
                     for (slot, log) in dirty_log.dirty_storage {
+                        match log {
+                            SlotChangeLog::Cold => {
+                                acc.storage.remove(&slot);
+                            }
+                            SlotChangeLog::OriginalDirty(previous) => {
+                                acc.storage.insert(slot, previous);
+                            }
+                        }
+                    }
+                    for (slot, log) in dirty_log.dirty_transient {
                         match log {
                             SlotChangeLog::Cold => {
                                 acc.storage.remove(&slot);
@@ -552,6 +564,7 @@ impl SubRoutine {
                         let mut dirty = DirtyChangeLog {
                             info: acc.info.clone(),
                             dirty_storage: Map::new(),
+                            dirty_transient: Map::new(),
                             was_clean: matches!(acc.filth, Filth::Clean),
                         };
                         dirty.dirty_storage.insert(index, SlotChangeLog::Cold);
@@ -604,6 +617,14 @@ impl SubRoutine {
         (original, present, new, is_cold)
     }
 
+    // TODO: need to add tload and tstore methods here
+    pub fn tload<DB: Database>(&mut self, address: H160, index: U256, db: &mut DB) -> (U256) {
+        let acc = self.state.get_mut(&address).unwrap(); // asume acc is hot
+        let load = match acc.transient.entry(index) {
+            // TODO
+        }
+    }
+
     /// push log into subroutine
     pub fn log(&mut self, log: Log) {
         self.logs.push(log);
@@ -616,6 +637,8 @@ pub struct Account {
     pub info: AccountInfo,
     /// storage cache
     pub storage: Map<U256, U256>,
+    /// TODO:
+    pub transient: Map<U256, U256>,
     /// is account info is dirty, destroyed or clean.
     /// if selfdestruct opcode is called, destroyed flag will be true. If true we dont need to fetch slot from DB.
     /// dirty flag contains list of original value and this is used to determent if slot was changed
@@ -634,6 +657,7 @@ impl From<AccountInfo> for Account {
         Self {
             info,
             storage: Map::new(),
+            transient: Map::new(),
             filth: Filth::Clean,
         }
     }

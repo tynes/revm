@@ -116,6 +116,21 @@ pub fn sstore<H: Host, SPEC: Spec>(interp: &mut Interpreter, host: &mut H) -> Re
     Return::Continue
 }
 
+pub fn tload<H: Host, SPEC: Spec>(interp: &mut Interpreter, host: &mut H) -> Return {
+    pop!(interp, index);
+    let value = host.tload(interp.contract.address, index);
+    gas!(interp, 200); // TODO
+    push!(interp, value);
+    Return::Continue
+}
+
+pub fn tstore<H: Host, SPEC: Spec>(interp: &mut Interpreter, host: &mut H) -> Return {
+    pop!(interp, index, value);
+    host.tstore(interp.contract.address, index, value);
+    gas!(interp, 200); // TODO
+    Return::Continue
+}
+
 pub fn log<H: Host, SPEC: Spec>(interp: &mut Interpreter, n: u8, host: &mut H) -> Return {
     check!(!SPEC::IS_STATIC_CALL);
 

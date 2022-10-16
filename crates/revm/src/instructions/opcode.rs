@@ -141,6 +141,8 @@ pub const LOG1: u8 = 0xa1;
 pub const LOG2: u8 = 0xa2;
 pub const LOG3: u8 = 0xa3;
 pub const LOG4: u8 = 0xa4;
+pub const TLOAD: u8 =  0xb3;
+pub const TSTORE: u8 = 0xb4;
 pub const CREATE: u8 = 0xf0;
 pub const CREATE2: u8 = 0xf5;
 pub const CALL: u8 = 0xf1;
@@ -431,8 +433,18 @@ macro_rules! gas_opcodee {
             /* 0xb0 */ OpInfo::none(),
             /* 0xb1 */ OpInfo::none(),
             /* 0xb2 */ OpInfo::none(),
-            /* 0xb3 */ OpInfo::none(),
-            /* 0xb4 */ OpInfo::none(),
+            /* 0xb3 */ // TODO: add shanghai SpecId
+            OpInfo::gas(if SpecId::enabled($spec_id, SpecId::LONDON) {
+                200
+            } else {
+                0
+            }),
+            /* 0xb4 */ // TODO: add shanghai SpecId
+            OpInfo::gas(if SpecId::enabled($spec_id, SpecId::LONDON) {
+                200
+            } else {
+                0
+            }),
             /* 0xb5 */ OpInfo::none(),
             /* 0xb6 */ OpInfo::none(),
             /* 0xb7 */ OpInfo::none(),
@@ -745,8 +757,8 @@ pub const OPCODE_JUMPMAP: [Option<&'static str>; 256] = [
     /* 0xb0 */ None,
     /* 0xb1 */ None,
     /* 0xb2 */ None,
-    /* 0xb3 */ None,
-    /* 0xb4 */ None,
+    /* 0xb3 */ Some("TLOAD"),
+    /* 0xb4 */ Some("TSTORE"),
     /* 0xb5 */ None,
     /* 0xb6 */ None,
     /* 0xb7 */ None,

@@ -38,3 +38,11 @@ pub fn msize(interp: &mut Interpreter) -> Return {
     push!(interp, U256::from(interp.memory.effective_len()));
     Return::Continue
 }
+
+pub fn tload(interp: &mut Interpreter) -> Return {
+    Return::Continue
+}
+
+pub fn tstore(interp: &mut Interpreter) -> Return {
+    Return::Continue
+}
